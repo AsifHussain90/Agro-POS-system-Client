@@ -5,9 +5,9 @@ import { Navbar } from "@/components/layout/Navbar";
 
 export function RootLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-surface text-on-surface font-body-md antialiased">
       <Navbar />
-      <main className="flex-1 pb-16 md:pb-0">
+      <main className="flex-1 w-full pb-16 lg:pb-0">
         <Outlet />
       </main>
       <Footer />

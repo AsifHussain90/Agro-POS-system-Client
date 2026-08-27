@@ -29,8 +29,8 @@ export function Sidebar() {
   const items = user?.role === "ADMIN" ? adminNav : farmerNav;
 
   return (
-    <aside className="hidden w-60 shrink-0 border-r bg-card md:block">
-      <nav className="flex flex-col gap-1 p-4">
+    <aside className="hidden w-64 shrink-0 border-r border-outline-variant/80 bg-surface-lowest md:block">
+      <nav className="flex flex-col gap-1.5 p-4">
         {items.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
@@ -38,13 +38,15 @@ export function Sidebar() {
             end={end}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground",
-                isActive && "bg-accent text-foreground",
+                "flex items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-medium transition-all duration-150",
+                isActive
+                  ? "bg-secondary-container text-on-secondary-container font-semibold shadow-level-1"
+                  : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
               )
             }
           >
-            <Icon className="h-4 w-4" />
-            {label}
+            <Icon className="h-4 w-4 shrink-0" />
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
