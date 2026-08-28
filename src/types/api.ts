@@ -23,6 +23,13 @@ export interface RegisterPayload {
   role: "USER" | "BUYER";
 }
 
+export interface AdminRegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  secretKey: string;
+}
+
 export interface ChangePasswordPayload {
   currentPassword: string;
   newPassword: string;

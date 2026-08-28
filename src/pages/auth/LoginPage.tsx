@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router";
 import { useLogin } from "@/hooks/useAuth";
 import { APP_NAME } from "@/lib/constants";
 import { toast } from "sonner";
-import loginBg from "@/assets/login.png";
+import { Eye, EyeOff } from "lucide-react";
+import loginBg from "@/assets/auth-images/login.png";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +33,8 @@ export function LoginPage() {
     );
   };
 
-  const fillDemo = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-  };
-
   return (
+
     <main className="min-h-screen w-full flex flex-col md:flex-row">
       {/* Left: Image & Branding */}
       <div
@@ -144,16 +143,29 @@ export function LoginPage() {
                   <span className="material-symbols-outlined text-outline">lock</span>
                 </div>
                 <input
-                  className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
+                  className="block w-full pl-10 pr-10 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
                   id="password"
                   name="password"
                   placeholder="••••••••"
                   required
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-on-surface-variant/70 hover:text-on-surface" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-on-surface-variant/70 hover:text-on-surface" />
+                  )}
+                </button>
               </div>
+
             </div>
 
             <button
@@ -165,30 +177,8 @@ export function LoginPage() {
             </button>
           </form>
 
-          {/* Demo login shortcuts */}
-          <div className="mt-lg border-t border-surface-container-highest pt-md space-y-2">
-            <p className="text-center font-label-sm text-label-sm text-on-surface-variant mb-2">
-              Quick access for demo:
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { label: "Admin", email: "admin@agro.com", pass: "admin123" },
-                { label: "Farmer", email: "farmer@agro.com", pass: "farmer123" },
-                { label: "Buyer", email: "buyer@agro.com", pass: "buyer123" },
-              ].map((demo) => (
-                <button
-                  key={demo.label}
-                  type="button"
-                  onClick={() => fillDemo(demo.email, demo.pass)}
-                  className="text-xs py-1.5 px-2 rounded-md border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary transition-colors font-label-sm"
-                >
-                  {demo.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <p className="mt-xl text-center font-body-md text-body-md text-on-surface-variant">
+
             Don't have an account?{" "}
             <Link
               to="/register"

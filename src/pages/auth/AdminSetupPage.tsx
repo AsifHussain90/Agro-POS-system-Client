@@ -1,72 +1,52 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router";
-import { useRegister } from "@/hooks/useAuth";
+import { Link } from "react-router";
+import { useAdminRegister } from "@/hooks/useAuth";
 import { APP_NAME } from "@/lib/constants";
-import type { RegisterPayload } from "@/types/api";
-import { toast } from "sonner";
-import { Eye, EyeOff, Leaf } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import registerBg from "@/assets/auth-images/register-bg.jpg";
 import loginBg from "@/assets/auth-images/login.png";
 
-export function RegisterPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const isFarmerFlow = searchParams.get("type") === "farmer";
+export function AdminSetupPage() {
+  const adminRegisterMutation = useAdminRegister();
 
-  // Redirect after registration: farmer flow â†’ /apply-farmer, else â†’ /login
-  const registerMutation = useRegister(isFarmerFlow ? "/apply-farmer" : "/login");
-
-  const [form, setForm] = useState<Omit<RegisterPayload, "role"> & { terms: boolean }>({
+  const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
-    terms: false,
+    secretKey: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showSecretKey, setShowSecretKey] = useState(false);
 
-  // Carousel state â€“ cycles between the two images every 4 seconds
   const images = [registerBg, loginBg];
   const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveImg((prev) => (prev + 1) % images.length);
-    }, 2000);
+    }, 4000);
     return () => clearInterval(timer);
   }, [images.length]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const target = e.target;
-    const value = target.type === "checkbox" ? target.checked : target.value;
-    setForm((prev) => ({ ...prev, [target.name]: value }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.terms) {
-      toast.error("Please accept the Terms of Service");
-      return;
-    }
-    registerMutation.mutate(
-      { name: form.name, email: form.email, password: form.password, role: "USER" },
-      {
-        onSuccess: () => {
-          if (isFarmerFlow) {
-            toast.success("Account created! Redirecting to farmer application...");
-          } else {
-            toast.success("Account created! Please log in.");
-          }
-          void navigate(isFarmerFlow ? "/apply-farmer" : "/login");
-        },
-      },
-    );
+    adminRegisterMutation.mutate({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      secretKey: form.secretKey,
+    });
   };
 
   return (
     <main className="min-h-screen w-full flex flex-col md:flex-row">
       {/* Left: Image Carousel & Branding */}
       <div className="hidden md:flex md:w-5/12 lg:w-1/2 relative flex-col justify-between overflow-hidden">
-        {/* Crossfade images */}
         {images.map((src, idx) => (
           <div
             key={idx}
@@ -79,33 +59,22 @@ export function RegisterPage() {
             }}
           />
         ))}
-
-        {/* Dark gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30 z-10" />
-
-
         <div className="relative z-10 p-margin-desktop">
           <div className="flex items-center gap-xs">
-            <span className="material-symbols-outlined text-on-primary text-headline-lg icon-fill">
-              eco
-            </span>
-            <h1 className="font-headline-lg text-headline-lg text-on-primary tracking-tight">
-              {APP_NAME}
-            </h1>
+            <span className="material-symbols-outlined text-on-primary text-headline-lg icon-fill">eco</span>
+            <h1 className="font-headline-lg text-headline-lg text-on-primary tracking-tight">{APP_NAME}</h1>
           </div>
         </div>
-
         <div className="relative z-10 p-margin-desktop mb-xl space-y-4">
           <div>
             <h2 className="font-display-lg text-display-lg text-on-primary mb-md leading-tight max-w-lg">
-              Cultivating the Future of Commerce.
+              Admin Control Center.
             </h2>
             <p className="font-body-lg text-body-lg text-surface-container-low max-w-md">
-              Empowering agricultural enterprises with precision tools and direct market access.
+              Set up the administrator account to manage the platform, users, and operations.
             </p>
           </div>
-
-          {/* Carousel dots */}
           <div className="flex items-center gap-2 pt-2">
             {images.map((_, idx) => (
               <button
@@ -114,9 +83,7 @@ export function RegisterPage() {
                 onClick={() => setActiveImg(idx)}
                 aria-label={`Slide ${idx + 1}`}
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === activeImg
-                    ? "w-8 bg-secondary-container"
-                    : "w-2 bg-white/50 hover:bg-white/80"
+                  idx === activeImg ? "w-8 bg-secondary-container" : "w-2 bg-white/50 hover:bg-white/80"
                 }`}
               />
             ))}
@@ -124,52 +91,45 @@ export function RegisterPage() {
         </div>
       </div>
 
-      {/* Right: Registration Form */}
+      {/* Right: Admin Setup Form */}
       <div className="w-full md:w-7/12 lg:w-1/2 flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface relative">
-        {/* Atmospheric decorations */}
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-secondary-container rounded-full mix-blend-multiply filter blur-[80px] opacity-30 animate-pulse pointer-events-none z-0"></div>
-        <div className="absolute top-0 left-0 w-48 h-48 bg-primary-container rounded-full mix-blend-multiply filter blur-[60px] opacity-20 pointer-events-none z-0"></div>
+        <div className="absolute bottom-0 right-0 w-64 h-64 bg-secondary-container rounded-full mix-blend-multiply filter blur-[80px] opacity-30 animate-pulse pointer-events-none z-0" />
+        <div className="absolute top-0 left-0 w-48 h-48 bg-primary-container rounded-full mix-blend-multiply filter blur-[60px] opacity-20 pointer-events-none z-0" />
 
         <div className="w-full max-w-[480px] bg-surface-container-lowest border border-[#D8F3DC] rounded-xl p-lg md:p-xl shadow-lg relative z-20">
           {/* Mobile Branding */}
           <div className="md:hidden flex items-center justify-center gap-xs mb-lg">
-            <span className="material-symbols-outlined text-primary text-headline-lg-mobile icon-fill">
-              eco
-            </span>
-            <span className="font-headline-lg-mobile text-headline-lg-mobile text-primary">
-              {APP_NAME}
-            </span>
+            <span className="material-symbols-outlined text-primary text-headline-lg-mobile icon-fill">eco</span>
+            <span className="font-headline-lg-mobile text-headline-lg-mobile text-primary">{APP_NAME}</span>
           </div>
 
           {/* Form Header */}
           <div className="mb-lg text-center md:text-left border-b border-surface-container-highest pb-md">
-            <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-xs">
-              {isFarmerFlow ? "Join as a Farmer" : "Grow Your Business with Agro"}
-            </h2>
+            <div className="flex items-center gap-2 mb-xs justify-center md:justify-start">
+              <ShieldCheck className="w-5 h-5 text-secondary" />
+              <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">
+                Admin Setup
+              </h2>
+            </div>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              {isFarmerFlow
-                ? "Create your account, then complete your farmer profile to start selling."
-                : "Join the community of trusted farmers and connect directly with buyers."}
+              Create the platform administrator account. A valid secret key is required.
             </p>
           </div>
 
-          {/* Farmer flow info banner */}
-          {isFarmerFlow && (
-            <div className="flex items-start gap-3 rounded-lg bg-secondary-container/40 border border-secondary/20 px-4 py-3 mb-md">
-              <Leaf className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
-              <p className="text-sm text-on-surface-variant leading-snug">
-                After registration you'll be redirected to submit your <span className="font-semibold text-on-surface">Farmer Application</span>. Your account will function as a regular user until approval.
-              </p>
-            </div>
-          )}
+          {/* Warning banner */}
+          <div className="flex items-start gap-3 rounded-lg bg-error/10 border border-error/20 px-4 py-3 mb-md">
+            <ShieldCheck className="w-5 h-5 text-error mt-0.5 shrink-0" />
+            <p className="text-sm text-on-surface-variant leading-snug">
+              This page is for{" "}
+              <span className="font-semibold text-on-surface">authorized personnel only</span>. The backend will
+              reject this request if an admin already exists or the secret key is invalid.
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-md">
             {/* Full Name */}
             <div className="space-y-1">
-              <label
-                className="block font-label-md text-label-md text-on-surface font-semibold"
-                htmlFor="name"
-              >
+              <label className="block font-label-md text-label-md text-on-surface font-semibold" htmlFor="name">
                 Full Name
               </label>
               <div className="relative">
@@ -178,23 +138,15 @@ export function RegisterPage() {
                 </div>
                 <input
                   className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
-                  id="name"
-                  name="name"
-                  placeholder="Jane Doe"
-                  required
-                  type="text"
-                  value={form.name}
-                  onChange={handleChange}
+                  id="name" name="name" placeholder="Administrator" required type="text"
+                  value={form.name} onChange={handleChange}
                 />
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-1">
-              <label
-                className="block font-label-md text-label-md text-on-surface font-semibold"
-                htmlFor="email"
-              >
+              <label className="block font-label-md text-label-md text-on-surface font-semibold" htmlFor="email">
                 Email Address
               </label>
               <div className="relative">
@@ -203,23 +155,15 @@ export function RegisterPage() {
                 </div>
                 <input
                   className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
-                  id="email"
-                  name="email"
-                  placeholder="jane@farm.com"
-                  required
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
+                  id="email" name="email" placeholder="admin@agro.com" required type="email"
+                  value={form.email} onChange={handleChange}
                 />
               </div>
             </div>
 
             {/* Password */}
             <div className="space-y-1">
-              <label
-                className="block font-label-md text-label-md text-on-surface font-semibold"
-                htmlFor="password"
-              >
+              <label className="block font-label-md text-label-md text-on-surface font-semibold" htmlFor="password">
                 Password
               </label>
               <div className="relative">
@@ -228,13 +172,9 @@ export function RegisterPage() {
                 </div>
                 <input
                   className="block w-full pl-10 pr-10 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
-                  id="password"
-                  name="password"
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                  required
+                  id="password" name="password" placeholder="••••••••" required
                   type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={handleChange}
+                  value={form.password} onChange={handleChange}
                 />
                 <button
                   type="button"
@@ -251,54 +191,48 @@ export function RegisterPage() {
               </div>
             </div>
 
-
-
-            {/* Terms */}
-            <div className="flex items-start mt-sm">
-              <div className="flex items-center h-5">
+            {/* Secret Key */}
+            <div className="space-y-1">
+              <label className="block font-label-md text-label-md text-on-surface font-semibold" htmlFor="secretKey">
+                Admin Secret Key
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-outline">key</span>
+                </div>
                 <input
-                  className="focus:ring-primary h-4 w-4 text-primary border-outline-variant rounded cursor-pointer bg-surface-container-lowest"
-                  id="terms"
-                  name="terms"
-                  required
-                  type="checkbox"
-                  checked={form.terms}
-                  onChange={handleChange}
+                  className="block w-full pl-10 pr-10 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
+                  id="secretKey" name="secretKey" placeholder="Enter the admin secret key" required
+                  type={showSecretKey ? "text" : "password"}
+                  value={form.secretKey} onChange={handleChange}
                 />
-              </div>
-              <div className="ml-3 text-sm">
-                <label
-                  className="font-body-md text-label-sm text-on-surface-variant cursor-pointer"
-                  htmlFor="terms"
+                <button
+                  type="button"
+                  onClick={() => setShowSecretKey((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+                  aria-label={showSecretKey ? "Hide secret key" : "Show secret key"}
                 >
-                  I agree to the{" "}
-                  <a className="text-primary hover:underline font-label-md" href="#">
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a className="text-primary hover:underline font-label-md" href="#">
-                    Privacy Policy
-                  </a>
-                  .
-                </label>
+                  {showSecretKey ? (
+                    <EyeOff className="w-5 h-5 text-on-surface-variant/70 hover:text-on-surface" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-on-surface-variant/70 hover:text-on-surface" />
+                  )}
+                </button>
               </div>
             </div>
 
             <button
-              disabled={registerMutation.isPending}
+              disabled={adminRegisterMutation.isPending}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-label-md text-label-md text-on-primary bg-[#012d1d] hover:bg-primary-container focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#012d1d] transition-colors mt-lg disabled:opacity-60 disabled:cursor-not-allowed"
               type="submit"
             >
-              {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+              {adminRegisterMutation.isPending ? "Creating Admin Account..." : "Create Admin Account"}
             </button>
           </form>
 
           <p className="mt-xl text-center font-body-md text-body-md text-on-surface-variant">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-label-md text-primary hover:text-primary-container font-semibold"
-            >
+            <Link to="/login" className="font-label-md text-primary hover:text-primary-container font-semibold">
               Log in
             </Link>
           </p>
@@ -307,3 +241,5 @@ export function RegisterPage() {
     </main>
   );
 }
+
+export default AdminSetupPage;
