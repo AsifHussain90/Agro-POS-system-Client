@@ -97,3 +97,12 @@ export function useProfile() {
     enabled: useAuthStore.getState().isAuthenticated(),
   });
 }
+
+export function useAuth() {
+  const user = useCurrentUser();
+  const isAuthenticated = useIsAuthenticated();
+  const logout = useLogout();
+  return { user, isAuthenticated, logout };
+}
+
+

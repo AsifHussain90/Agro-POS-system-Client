@@ -74,6 +74,7 @@ export const router = createBrowserRouter([
           { path: "change-password", element: <ChangePasswordPage /> },
           { path: "requests", element: <FarmerRequestPage /> },
           { path: "checkout", element: <CheckoutPage /> },
+          { path: "cart", element: <CheckoutPage /> },
 
           // Buyer specific routes
           {

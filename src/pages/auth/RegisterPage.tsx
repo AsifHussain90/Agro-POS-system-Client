@@ -4,21 +4,22 @@ import { useRegister } from "@/hooks/useAuth";
 import { APP_NAME } from "@/lib/constants";
 import type { RegisterPayload } from "@/types/api";
 import { toast } from "sonner";
-import registerBg from "@/assets/register-bg.jpg";
-import loginBg from "@/assets/login.png";
+import { Eye, EyeOff } from "lucide-react";
+import registerBg from "@/assets/auth-images/register-bg.jpg";
+import loginBg from "@/assets/auth-images/login.png";
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const registerMutation = useRegister();
 
-  const [form, setForm] = useState<RegisterPayload & { confirmPassword: string; terms: boolean }>({
+  const [form, setForm] = useState<Omit<RegisterPayload, "role"> & { terms: boolean }>({
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    role: "BUYER",
     terms: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
+
 
   // Carousel state – cycles between the two images every 4 seconds
   const images = [registerBg, loginBg];
@@ -31,24 +32,20 @@ export function RegisterPage() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const target = e.target as HTMLInputElement;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const target = e.target;
     const value = target.type === "checkbox" ? target.checked : target.value;
     setForm((prev) => ({ ...prev, [target.name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
     if (!form.terms) {
       toast.error("Please accept the Terms of Service");
       return;
     }
     registerMutation.mutate(
-      { name: form.name, email: form.email, password: form.password, role: form.role },
+      { name: form.name, email: form.email, password: form.password, role: "USER" },
       {
         onSuccess: () => {
           toast.success("Account created! Please log in.");
@@ -57,6 +54,8 @@ export function RegisterPage() {
       },
     );
   };
+
+
 
   return (
     <main className="min-h-screen w-full flex flex-col md:flex-row">
@@ -198,80 +197,44 @@ export function RegisterPage() {
               </div>
             </div>
 
-            {/* Role */}
+            {/* Password */}
             <div className="space-y-1">
               <label
                 className="block font-label-md text-label-md text-on-surface font-semibold"
-                htmlFor="role"
+                htmlFor="password"
               >
-                I am registering as
+                Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-outline">badge</span>
+                  <span className="material-symbols-outlined text-outline">lock</span>
                 </div>
-                <select
-                  className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow appearance-none"
-                  id="role"
-                  name="role"
-                  value={form.role}
+                <input
+                  className="block w-full pl-10 pr-10 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
+                  id="password"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  type={showPassword ? "text" : "password"}
+                  value={form.password}
                   onChange={handleChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-outline hover:text-on-surface transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  <option value="BUYER">Buyer (Consumer / Business)</option>
-                  <option value="USER">Farmer (Apply for Producer Status)</option>
-                </select>
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-on-surface-variant/70 hover:text-on-surface" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-on-surface-variant/70 hover:text-on-surface" />
+                  )}
+                </button>
               </div>
             </div>
 
-            {/* Passwords */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-              <div className="space-y-1">
-                <label
-                  className="block font-label-md text-label-md text-on-surface font-semibold"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="material-symbols-outlined text-outline">lock</span>
-                  </div>
-                  <input
-                    className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
-                    id="password"
-                    name="password"
-                    placeholder="••••••••"
-                    required
-                    type="password"
-                    value={form.password}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label
-                  className="block font-label-md text-label-md text-on-surface font-semibold"
-                  htmlFor="confirmPassword"
-                >
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="material-symbols-outlined text-outline">lock_reset</span>
-                  </div>
-                  <input
-                    className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-md bg-surface-container-lowest text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-[#64b68e]/20 focus:border-[#64b68e] transition-shadow"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    required
-                    type="password"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
+
 
             {/* Terms */}
             <div className="flex items-start mt-sm">
