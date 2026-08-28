@@ -15,6 +15,7 @@ import { TrackOrderPage } from "@/pages/public/TrackOrderPage";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { ChangePasswordPage } from "@/pages/auth/ChangePasswordPage";
+import { AdminSetupPage } from "@/pages/auth/AdminSetupPage";
 
 // Buyer pages
 import { CheckoutPage } from "@/pages/buyer/CheckoutPage";
@@ -55,6 +56,14 @@ export const router = createBrowserRouter([
       </AuthRedirect>
     ),
   },
+  {
+    path: "admin-setup",
+    element: (
+      <AuthRedirect>
+        <AdminSetupPage />
+      </AuthRedirect>
+    ),
+  },
 
   // Main app routes (with Navbar & Footer)
   {
@@ -79,7 +88,7 @@ export const router = createBrowserRouter([
           // Buyer specific routes
           {
             path: "buyer",
-            element: <RoleGuard roles={["BUYER", "ADMIN", "USER", "FARMER"]} />,
+            element: <RoleGuard roles={["ADMIN", "USER", "FARMER"]} />,
             children: [
               { path: "orders", element: <BuyerOrdersPage /> },
               { path: "profile", element: <BuyerProfilePage /> },

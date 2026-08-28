@@ -6,6 +6,7 @@ import { QUERY_KEYS } from "@/lib/constants";
 import { useAuthStore } from "@/stores/authStore";
 import type { User } from "@/types";
 import type {
+  AdminRegisterPayload,
   AuthResponse,
   ChangePasswordPayload,
   LoginPayload,
@@ -37,7 +38,7 @@ export function useLogin() {
           ? "/admin"
           : data.user.role === "FARMER"
             ? "/farmer"
-            : data.user.role === "BUYER"
+            : data.user.role === "USER"
               ? "/buyer/orders"
               : "/requests";
       void navigate(home);
@@ -46,7 +47,7 @@ export function useLogin() {
   });
 }
 
-export function useRegister() {
+export function useRegister(redirectTo?: string) {
   const setAuth = useAuthStore((s) => s.setAuth);
   const navigate = useNavigate();
 
@@ -58,7 +59,23 @@ export function useRegister() {
     onSuccess: (data) => {
       setAuth(data.user as User, data.accessToken);
       toast.success("Account created");
-      void navigate(data.user.role === "BUYER" ? "/products" : "/requests");
+      void navigate(redirectTo ?? "/login");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useAdminRegister() {
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: async (payload: AdminRegisterPayload) => {
+      const { data } = await api.post<AuthResponse>("/auth/admin-register", payload);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Admin account created! Please log in.");
+      void navigate("/login");
     },
     onError: (error: Error) => toast.error(error.message),
   });
